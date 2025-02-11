@@ -171,9 +171,14 @@ func main() {
 	}
 
 	// +kubebuilder:scaffold:builder
+	kubeset, err := kubernetes.NewForConfig(mgr.GetConfig())
+	if err != nil {
+		setupLog.Error(err, "unable to connect to kubernetes rest")
+	}
 
 	if err = (&controllers.OIDCGithubManagedClusterReconciler{
 		Client: mgr.GetClient(),
+		Kubeset: kubeset,
 		Log:    ctrl.Log.WithName("controllers").WithName("oidc-github"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

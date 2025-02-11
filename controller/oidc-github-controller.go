@@ -10,12 +10,16 @@ import (
 	managedclusterv1 "open-cluster-management.io/api/cluster/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/client-go/kubernetes"
+	"github.com/google/go-github/v69/github"
+
 )
 
 const GitHubLabelKey = "oidc.open-cluster-management.io/github-enable"
 
 type OIDCGithubManagedClusterReconciler struct {
 	client.Client
+	Kubeset  kubernetes.Interface
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
@@ -51,11 +55,17 @@ func (r *OIDCGithubManagedClusterReconciler) Reconcile(ctx context.Context, req 
 	// REMOVE TASKs
 	// When deleting the Managed Cluster:
 	// 1. remove the GitHub OAuth APP entry for the cluster being deleted
-
 	// ENABLE TASKs
 	// ➡️ 1. Pull up relevant cluster information API and OAUTH
+	consoleUrl := managedCluster.Spec.console_url
+	oauthUrl := strings.Replace(apiUrl, "/api.", "/oauth.apps.")
+
 	//     3. Build a GitHub API connection with the token
+	client := github.NewClient(nil).WithAuthToken(githubAccess.Data["github_oauth_app_token"])
+	
 	//     4. Create an OAuth APP for the cluster, using the included URL and Secret data
+    /* It doesn't look like this is supported, without using a browser interaction automation */
+
 	//     5. Get the new OAuth token from GitHub
 	//     6. Create a ManifestWork with an authConfig object and secret that will join the cluster to GitHub auth
 
